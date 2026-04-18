@@ -53,17 +53,23 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v4
 
-      # MANUELLE PLATZSCHAFFUNG (Statt externer Action)
+      # NEU: Login bei der Registry, damit der "denied" Fehler verschwindet
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+
+      # Platz schaffen für die ISO
       - name: Free Disk Space
         run: |
           sudo rm -rf /usr/share/dotnet
           sudo rm -rf /usr/local/lib/android
           sudo rm -rf /opt/ghc
-          sudo rm -rf "/usr/local/share/boost"
           sudo docker image prune --all --force
-          df -h
 
-      # ISO GENERIERUNG VIA DOCKER (Direkter Zugriff)
+      # Jetzt der Docker-Befehl mit Anmeldung
       - name: Generate ISO
         run: |
           mkdir -p ./output
