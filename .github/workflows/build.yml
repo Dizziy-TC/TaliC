@@ -8,7 +8,6 @@ on:
   pull_request:
   workflow_dispatch:
 
-# Wir erzwingen Node 24, um die Deprecation-Fehler zu ignorieren
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
@@ -19,7 +18,7 @@ concurrency:
 jobs:
   bluebuild:
     name: Build Custom Image
-    runs-on: ubuntu-24.04 # Wir nutzen den aktuellsten Runner von 2026
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
@@ -45,7 +44,7 @@ jobs:
   build-iso:
     name: Generate ISO
     needs: [bluebuild]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
@@ -54,27 +53,30 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v4
 
-      # Wir nutzen das Original-Tool für den Speicherplatz, das ist 2026 stabiler
-      - name: Maximize build space
-        uses: easimon/maximize-build-space@v10
-        with:
-          root-reserve-mb: 2000
-          swap-size-mb: 1024
-          remove-dotnet: true
-          remove-android: true
-          remove-haskell: true
+      # MANUELLE PLATZSCHAFFUNG (Statt externer Action)
+      - name: Free Disk Space
+        run: |
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /opt/ghc
+          sudo rm -rf "/usr/local/share/boost"
+          sudo docker image prune --all --force
+          df -h
 
-      # Wir nutzen den Generator direkt über den Hauptzweig, um Auflösungsfehler zu vermeiden
+      # ISO GENERIERUNG VIA DOCKER (Direkter Zugriff)
       - name: Generate ISO
-        uses: blue-build/isogenerator@main 
-        with:
-          image-name: talic
-          image-tag: latest
-          registry: ghcr.io/${{ github.repository_owner }}
-          installer-repo: fedora
-          variant: 'Kinoite'
-          arch: x86_64
-          cosign-key: cosign.pub
+        run: |
+          mkdir -p ./output
+          docker run --privileged \
+            -v $(pwd):/build \
+            -w /build \
+            ghcr.io/blue-build/isogenerator:latest \
+            --image-name talic \
+            --image-tag latest \
+            --registry ghcr.io/${{ github.repository_owner }} \
+            --variant Kinoite \
+            --arch x86_64 \
+            --cosign-key cosign.pub
 
       - name: Upload ISO as Artifact
         uses: actions/upload-artifact@v4
