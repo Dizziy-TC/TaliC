@@ -47,9 +47,19 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v4
 
-      # Wir nutzen jetzt die offizielle Repo-Action, die stabiler ist
+      # ISOs sind groß – wir schaffen hier erst mal Platz auf dem Server
+      - name: Maximize build space
+        uses: ublue-os/maximize-build-space@main
+        with:
+          root-reserve-mb: 2000
+          swap-size-mb: 1024
+          remove-dotnet: true
+          remove-android: true
+          remove-haskell: true
+
+      # Jetzt das offizielle Werkzeug mit dem korrekten @v1 Tag
       - name: Generate ISO
-        uses: blue-build/iso-generator-action@v1
+        uses: blue-build/isogenerator@v1
         with:
           image-name: talic
           image-tag: latest
@@ -57,7 +67,6 @@ jobs:
           installer-repo: fedora
           variant: 'Kinoite'
           arch: x86_64
-          # Hier wird die ISO mit deinem Key signiert
           cosign-key: cosign.pub
 
       - name: Upload ISO as Artifact
