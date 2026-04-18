@@ -6,13 +6,13 @@ base-image: ghcr.io/ublue-os/kinoite-nvidia
 image-version: 43
 
 modules:
-  # Deine eigenen Dateien (Icon etc.) - Das klappt jetzt!
+  # Deine eigenen Dateien (Icon etc.)
   - type: files
     files:
       - source: usr
         destination: /usr
 
-  # System-Pakete (Mit fest eingetragenen Repos für Fedora 43)
+  # System-Pakete
   - type: rpm-ostree
     repos:
       - https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-43.noarch.rpm
@@ -27,7 +27,7 @@ modules:
       - pipewire-utils
       - nvtop
       - btop
-      - xorg-x11-drv-nvidia-cuda
+      # NVIDIA-CUDA wurde entfernt, da es im Basis-Image bereits enthalten ist!
 
   # Das Flatpak-Format (V2)
   - type: default-flatpaks
@@ -38,7 +38,7 @@ modules:
           - org.kde.kcalc
           - net.davidotek.pupgui2
 
-  # Scripte (Optimierungen beim Bauen)
+  # Scripte
   - type: script
     scripts:
       - post-install.sh
