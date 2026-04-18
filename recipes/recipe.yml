@@ -6,14 +6,17 @@ base-image: ghcr.io/ublue-os/kinoite-nvidia
 image-version: 43
 
 modules:
-  # Deine eigenen Dateien (Icon etc.) - Das hat jetzt geklappt!
+  # Deine eigenen Dateien (Icon etc.) - Das klappt jetzt!
   - type: files
     files:
       - source: usr
         destination: /usr
 
-  # System-Pakete (Die Repos sind im ublue-image schon drin)
+  # System-Pakete (Mit fest eingetragenen Repos für Fedora 43)
   - type: rpm-ostree
+    repos:
+      - https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-43.noarch.rpm
+      - https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-43.noarch.rpm
     install:
       - steam
       - lutris
