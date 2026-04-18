@@ -8,7 +8,7 @@ on:
   pull_request:
   workflow_dispatch:
 
-# Wir schalten hier global auf Node 24 um, um die Deprecation-Warnungen zu umgehen
+# Wir erzwingen Node 24, um die Deprecation-Fehler zu ignorieren
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
@@ -19,7 +19,7 @@ concurrency:
 jobs:
   bluebuild:
     name: Build Custom Image
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04 # Wir nutzen den aktuellsten Runner von 2026
     permissions:
       contents: read
       packages: write
@@ -45,7 +45,7 @@ jobs:
   build-iso:
     name: Generate ISO
     needs: [bluebuild]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
       packages: write
@@ -54,9 +54,9 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v4
 
-      # Wir nutzen hier die stabilste Version für den Speicherplatz
+      # Wir nutzen das Original-Tool für den Speicherplatz, das ist 2026 stabiler
       - name: Maximize build space
-        uses: ublue-os/maximize-build-space@v1.3
+        uses: easimon/maximize-build-space@v10
         with:
           root-reserve-mb: 2000
           swap-size-mb: 1024
@@ -64,9 +64,9 @@ jobs:
           remove-android: true
           remove-haskell: true
 
-      # Wir nutzen den Generator direkt über den stabilen v1-Zweig
+      # Wir nutzen den Generator direkt über den Hauptzweig, um Auflösungsfehler zu vermeiden
       - name: Generate ISO
-        uses: blue-build/isogenerator@v1
+        uses: blue-build/isogenerator@main 
         with:
           image-name: talic
           image-tag: latest
