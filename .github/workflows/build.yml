@@ -53,7 +53,6 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v4
 
-      # NEU: Login bei der Registry, damit der "denied" Fehler verschwindet
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
         with:
@@ -61,7 +60,6 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ github.token }}
 
-      # Platz schaffen für die ISO
       - name: Free Disk Space
         run: |
           sudo rm -rf /usr/share/dotnet
@@ -69,14 +67,14 @@ jobs:
           sudo rm -rf /opt/ghc
           sudo docker image prune --all --force
 
-      # Jetzt der Docker-Befehl mit Anmeldung
+      # Wir nutzen hier jetzt das 'main' Tag statt 'latest'
       - name: Generate ISO
         run: |
           mkdir -p ./output
           docker run --privileged \
             -v $(pwd):/build \
             -w /build \
-            ghcr.io/blue-build/isogenerator:latest \
+            ghcr.io/blue-build/isogenerator:main \
             --image-name talic \
             --image-tag latest \
             --registry ghcr.io/${{ github.repository_owner }} \
