@@ -1,12 +1,12 @@
 name: bluebuild
 on:
   schedule:
-    - cron: "00 06 * * *" # Täglicher automatischer Bau um 06:00 UTC
+    - cron: "00 06 * * *"
   push:
     paths-ignore:
       - "**.md"
   pull_request:
-  workflow_dispatch: # Erlaubt es dir, den Bau manuell zu starten
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
@@ -47,9 +47,9 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v4
 
-      # Dieser Schritt nutzt jetzt den direkten Docker-Pfad, um "Not Found" Fehler zu vermeiden
+      # Wir nutzen jetzt die offizielle Repo-Action, die stabiler ist
       - name: Generate ISO
-        uses: docker://ghcr.io/blue-build/isogenerator:latest
+        uses: blue-build/iso-generator-action@v1
         with:
           image-name: talic
           image-tag: latest
@@ -57,6 +57,7 @@ jobs:
           installer-repo: fedora
           variant: 'Kinoite'
           arch: x86_64
+          # Hier wird die ISO mit deinem Key signiert
           cosign-key: cosign.pub
 
       - name: Upload ISO as Artifact
