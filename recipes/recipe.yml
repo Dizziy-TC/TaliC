@@ -6,18 +6,27 @@ base-image: ghcr.io/ublue-os/kinoite-nvidia
 image-version: 43
 
 modules:
-  # Deine eigenen Dateien (Icon etc.)
+  # Deine Dateien (Logo, ASCII, Fastfetch-Config)
+  # Kopiert alles aus 'files/usr' nach '/usr' und 'files/etc' nach '/etc'
   - type: files
     files:
       - source: usr
         destination: /usr
+      - source: etc
+        destination: /etc
 
-  # System-Layer (Nur Treiber & Hardware-Tools)
+  # Das Logo beim Hochfahren (Startup Splash)
+  - type: plymouth
+    data:
+      theme: bgrt
+
+  # System-Layer (Treiber, Hardware-Tools & Fastfetch)
   - type: rpm-ostree
     repos:
       - https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-43.noarch.rpm
       - https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-43.noarch.rpm
     install:
+      - fastfetch
       - mangohud
       - gamemode
       - obs-studio
@@ -30,15 +39,14 @@ modules:
   - type: default-flatpaks
     configurations:
       - install:
-          - com.valvesoftware.Steam       # Steam als Flatpak (löst den Fehler!)
-          - net.lutris.Lutris             # Lutris als Flatpak
+          - com.valvesoftware.Steam
+          - net.lutris.Lutris
           - org.mozilla.firefox
           - com.discordapp.Discord
           - org.kde.kcalc
-          - net.davidotek.pupgui2         # Dein Proton-Manager
+          - net.davidotek.pupgui2
 
-  # Scripte
+  # Scripte (Hier wird unter anderem dein Startmenü-Icon aktiviert)
   - type: script
     scripts:
       - post-install.sh
-    
