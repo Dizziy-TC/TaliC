@@ -44,5 +44,5 @@ modules:
       - org.mozilla.firefox
       - com.discordapp.Discord
       - org.kde.kcalc
-      # ProtonUp-Qt: Damit installierst du Proton GE mit einem Klick für Steam & Lutris
+      # ProtonUp-Qt: Damit installierst du Proton GE mit einem Klick
       - net.davidotek.pupgui2
