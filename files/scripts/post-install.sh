@@ -1,17 +1,10 @@
 #!/usr/bin/env bash
-
-# Fehler abfangen
 set -oue pipefail
 
 echo "Starte TaliC OS Optimierungen..."
 
-# Beispiel: Starte den Steam-Hardware-Check oder ähnliches
-# Hier kannst du später Befehle einfügen, die nach der Installation laufen sollen.
-
-echo "Optimierungen abgeschlossen!"
-
-# Setzt das TaliC Logo als Icon für das Startmenü (KDE Kickoff)
+# Setzt das PNG-Logo als Icon für das Startmenü (KDE Kickoff)
+# Wir nutzen || true, damit das Script nicht abbricht, falls der Pfad mal leicht anders ist
 sed -i 's/icon=fedora-logo-icon/icon=talic-logo/' /usr/share/plasma/plasmoids/org.kde.plasma.kickoff/contents/config/main.xml || true
 
-# Setzt das Standard-Design für den Boot-Vorgang
-plymouth-set-default-theme bgrt -R
+echo "Optimierungen abgeschlossen!"
