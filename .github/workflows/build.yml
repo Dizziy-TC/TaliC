@@ -8,6 +8,10 @@ on:
   pull_request:
   workflow_dispatch:
 
+# Wir schalten hier global auf Node 24 um, um die Deprecation-Warnungen zu umgehen
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
   cancel-in-progress: true
@@ -26,6 +30,9 @@ jobs:
         recipe:
           - recipe.yml
     steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
       - name: Build Custom Image
         uses: blue-build/github-action@v1.8
         with:
@@ -47,9 +54,9 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v4
 
-      # ISOs sind groß – wir schaffen hier erst mal Platz auf dem Server
+      # Wir nutzen hier die stabilste Version für den Speicherplatz
       - name: Maximize build space
-        uses: ublue-os/maximize-build-space@main
+        uses: ublue-os/maximize-build-space@v1.3
         with:
           root-reserve-mb: 2000
           swap-size-mb: 1024
@@ -57,7 +64,7 @@ jobs:
           remove-android: true
           remove-haskell: true
 
-      # Jetzt das offizielle Werkzeug mit dem korrekten @v1 Tag
+      # Wir nutzen den Generator direkt über den stabilen v1-Zweig
       - name: Generate ISO
         uses: blue-build/isogenerator@v1
         with:
