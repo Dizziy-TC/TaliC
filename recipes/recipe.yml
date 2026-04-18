@@ -1,48 +1,46 @@
-# Das offizielle Rezept für TaliC OS
+# yaml-language-server: $schema=https://schema.blue-build.org/recipe-v1.json
 name: talic
 description: Hochmodernes Atomic Gaming- & Streaming-OS (KDE Plasma + NVIDIA).
 
-# Basis: Fedora Kinoite (Atomic KDE) mit NVIDIA-Treibern für maximale Leistung
 base-image: ghcr.io/ublue-os/kinoite-nvidia
-image-flavor: main
-fedora-version: 43
+image-version: 43 # Das ersetzt 'fedora-version'
 
-scripts:
-  post:
-    - post-install.sh
+# 'scripts' und 'image-flavor' müssen jetzt in diesen Block, falls benötigt
+# Da das ublue-base-image das meiste regelt, reicht das hier:
 
 modules:
-  # Modul für dein eigenes Icon (wird aus files/usr kopiert)
+  # Modul für dein eigenes Icon
   - type: files
     files:
       - usr: /usr
 
-  # System-Pakete (fest im Kern des Betriebssystems verankert)
+  # System-Pakete
   - type: rpm-ostree
     repos:
       - https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-%s.noarch.rpm
       - https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-%s.noarch.rpm
     install:
-      # Gaming-Basis
       - steam
       - lutris
       - mangohud
       - gamemode
-      # Streaming & Audio-Performance
       - obs-studio
       - obs-studio-plugin-vaapi
       - pipewire-utils
-      # Hardware-Tools für deinen starken PC
       - nvtop
       - btop
       - xorg-x11-drv-nvidia-cuda
 
-  # Apps & Tools (als isolierte Flatpaks für mehr Sicherheit)
+  # Apps & Tools (Das neue Format für Flatpaks v2)
   - type: default-flatpaks
     notify: true
-    system:
+    install: # 'system' wurde durch 'install' ersetzt
       - org.mozilla.firefox
       - com.discordapp.Discord
       - org.kde.kcalc
-      # ProtonUp-Qt: Damit installierst du Proton GE mit einem Klick
-      - net.davidotek.pupgui2
+      - net.davidotek.pupgui2 
+
+  # Script-Modul (Falls du dein post-install.sh ausführen willst)
+  - type: script
+    scripts:
+      - post-install.sh
