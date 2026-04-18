@@ -6,17 +6,14 @@ base-image: ghcr.io/ublue-os/kinoite-nvidia
 image-version: 43
 
 modules:
-  # Das neue 'files' Format (V2) - Hier kommen deine Icons & Configs rein
+  # Deine eigenen Dateien (Icon etc.) - Das hat jetzt geklappt!
   - type: files
     files:
-      - source: usr # Sucht im Repository-Ordner 'files/usr'
-        destination: /usr # Kopiert es direkt in das System-Verzeichnis /usr
+      - source: usr
+        destination: /usr
 
-  # System-Pakete
+  # System-Pakete (Die Repos sind im ublue-image schon drin)
   - type: rpm-ostree
-    repos:
-      - https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-%s.noarch.rpm
-      - https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-%s.noarch.rpm
     install:
       - steam
       - lutris
@@ -29,7 +26,7 @@ modules:
       - btop
       - xorg-x11-drv-nvidia-cuda
 
-  # Apps & Tools (Flatpak-Format V2)
+  # Das Flatpak-Format (V2)
   - type: default-flatpaks
     configurations:
       - install:
