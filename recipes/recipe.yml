@@ -6,10 +6,11 @@ base-image: ghcr.io/ublue-os/kinoite-nvidia
 image-version: 43
 
 modules:
-  # Modul für Dateien (Icons, etc.)
+  # Das neue 'files' Format (V2) - Hier kommen deine Icons & Configs rein
   - type: files
     files:
-      - usr: /usr
+      - source: usr # Sucht im Repository-Ordner 'files/usr'
+        destination: /usr # Kopiert es direkt in das System-Verzeichnis /usr
 
   # System-Pakete
   - type: rpm-ostree
@@ -28,7 +29,7 @@ modules:
       - btop
       - xorg-x11-drv-nvidia-cuda
 
-  # Das neue Flatpak-Format (V2)
+  # Apps & Tools (Flatpak-Format V2)
   - type: default-flatpaks
     configurations:
       - install:
@@ -37,7 +38,7 @@ modules:
           - org.kde.kcalc
           - net.davidotek.pupgui2
 
-  # Scripte
+  # Scripte (Optimierungen beim Bauen)
   - type: script
     scripts:
       - post-install.sh
