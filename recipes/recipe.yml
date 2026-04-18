@@ -1,45 +1,48 @@
----
-# yaml-language-server: $schema=https://schema.blue-build.org/recipe-v1.json
-# image will be published to ghcr.io/<user>/<name>
-name: template
-# description will be included in the image's metadata
-description: This is my personal OS image.
+# Das offizielle Rezept für TaliC OS
+name: talic
+description: Hochmodernes Atomic Gaming- & Streaming-OS (KDE Plasma + NVIDIA).
 
-# the base image to build on top of (FROM) and the version tag to use
-base-image: ghcr.io/ublue-os/silverblue-main
-image-version: 42 # latest is also supported if you want new updates ASAP
+# Basis: Fedora Kinoite (Atomic KDE) mit NVIDIA-Treibern für maximale Leistung
+base-image: ghcr.io/ublue-os/kinoite-nvidia
+image-flavor: main
+fedora-version: 43
 
-# module configuration, executed in order
-# you can include multiple instances of the same module
+scripts:
+  post:
+    - post-install.sh
+
 modules:
+  # Modul für dein eigenes Icon (wird aus files/usr kopiert)
   - type: files
     files:
-      - source: system
-        destination: / # copies files/system/* (* means everything inside it) into your image's root folder /
+      - usr: /usr
 
-  - type: dnf
+  # System-Pakete (fest im Kern des Betriebssystems verankert)
+  - type: rpm-ostree
     repos:
-      copr:
-        - atim/starship
+      - https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-%s.noarch.rpm
+      - https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-%s.noarch.rpm
     install:
-      packages:
-        - micro
-        - starship
-    remove:
-      packages:
-        # example: removing firefox (in favor of the flatpak)
-        # "firefox" is the main package, "firefox-langpacks" is a dependency
-        - firefox
-        - firefox-langpacks # also remove firefox dependency (not required for all packages, this is a special case)
+      # Gaming-Basis
+      - steam
+      - lutris
+      - mangohud
+      - gamemode
+      # Streaming & Audio-Performance
+      - obs-studio
+      - obs-studio-plugin-vaapi
+      - pipewire-utils
+      # Hardware-Tools für deinen starken PC
+      - nvtop
+      - btop
+      - xorg-x11-drv-nvidia-cuda
 
+  # Apps & Tools (als isolierte Flatpaks für mehr Sicherheit)
   - type: default-flatpaks
-    configurations:
-      - notify: true # Send notification after install/uninstall is finished (true/false)
-        scope: system
-        # If no repo information is specified, Flathub will be used by default
-        install: # system flatpaks we want all users to have and not remove
-          - org.mozilla.firefox
-          - org.gnome.Loupe
-      - scope: user # Also add Flathub user repo, but no user packages
-
-  - type: signing # this sets up the proper policy & signing files for signed images to work fully
+    notify: true
+    system:
+      - org.mozilla.firefox
+      - com.discordapp.Discord
+      - org.kde.kcalc
+      # ProtonUp-Qt: Damit installierst du Proton GE mit einem Klick für Steam & Lutris
+      - net.davidotek.pupgui2
