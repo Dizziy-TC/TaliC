@@ -12,14 +12,12 @@ modules:
       - source: usr
         destination: /usr
 
-  # System-Pakete
+  # System-Layer (Nur Treiber & Hardware-Tools)
   - type: rpm-ostree
     repos:
       - https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-43.noarch.rpm
       - https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-43.noarch.rpm
     install:
-      - steam
-      - lutris
       - mangohud
       - gamemode
       - obs-studio
@@ -27,18 +25,20 @@ modules:
       - pipewire-utils
       - nvtop
       - btop
-      # NVIDIA-CUDA wurde entfernt, da es im Basis-Image bereits enthalten ist!
 
-  # Das Flatpak-Format (V2)
+  # App-Layer (Isoliert & Sicher als Flatpaks)
   - type: default-flatpaks
     configurations:
       - install:
+          - com.valvesoftware.Steam       # Steam als Flatpak (löst den Fehler!)
+          - net.lutris.Lutris             # Lutris als Flatpak
           - org.mozilla.firefox
           - com.discordapp.Discord
           - org.kde.kcalc
-          - net.davidotek.pupgui2
+          - net.davidotek.pupgui2         # Dein Proton-Manager
 
   # Scripte
   - type: script
     scripts:
       - post-install.sh
+    
