@@ -37,7 +37,7 @@ jobs:
 
   build-iso:
     name: Generate ISO
-    needs: [bluebuild] # Wartet, bis das Image fertig gebaut wurde
+    needs: [bluebuild]
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -47,17 +47,16 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v4
 
+      # Dieser Schritt nutzt jetzt den direkten Docker-Pfad, um "Not Found" Fehler zu vermeiden
       - name: Generate ISO
-        uses: blue-build/isogenerator@v1
+        uses: docker://ghcr.io/blue-build/isogenerator:latest
         with:
           image-name: talic
-          # Wir ziehen das Image direkt aus deiner Registry, die wir gerade befüllt haben
           image-tag: latest
           registry: ghcr.io/${{ github.repository_owner }}
           installer-repo: fedora
-          variant: 'Kinoite' # Wichtig für dein KDE Plasma Setup
+          variant: 'Kinoite'
           arch: x86_64
-          # Hier wird die ISO signiert, damit sie sicher ist
           cosign-key: cosign.pub
 
       - name: Upload ISO as Artifact
