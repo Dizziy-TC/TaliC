@@ -3,13 +3,10 @@ name: talic
 description: Hochmodernes Atomic Gaming- & Streaming-OS (KDE Plasma + NVIDIA).
 
 base-image: ghcr.io/ublue-os/kinoite-nvidia
-image-version: 43 # Das ersetzt 'fedora-version'
-
-# 'scripts' und 'image-flavor' müssen jetzt in diesen Block, falls benötigt
-# Da das ublue-base-image das meiste regelt, reicht das hier:
+image-version: 43
 
 modules:
-  # Modul für dein eigenes Icon
+  # Modul für Dateien (Icons, etc.)
   - type: files
     files:
       - usr: /usr
@@ -31,16 +28,16 @@ modules:
       - btop
       - xorg-x11-drv-nvidia-cuda
 
-  # Apps & Tools (Das neue Format für Flatpaks v2)
+  # Das neue Flatpak-Format (V2)
   - type: default-flatpaks
-    notify: true
-    install: # 'system' wurde durch 'install' ersetzt
-      - org.mozilla.firefox
-      - com.discordapp.Discord
-      - org.kde.kcalc
-      - net.davidotek.pupgui2 
+    configurations:
+      - install:
+          - org.mozilla.firefox
+          - com.discordapp.Discord
+          - org.kde.kcalc
+          - net.davidotek.pupgui2
 
-  # Script-Modul (Falls du dein post-install.sh ausführen willst)
+  # Scripte
   - type: script
     scripts:
       - post-install.sh
