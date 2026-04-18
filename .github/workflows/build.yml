@@ -1,15 +1,15 @@
 name: bluebuild
-
 on:
   schedule:
-    - cron: "00 06 * * *"
+    - cron: "00 06 * * *" # Täglicher automatischer Bau um 06:00 UTC
   push:
     paths-ignore:
       - "**.md"
   pull_request:
-  workflow_dispatch:
+  workflow_dispatch: # Erlaubt manuelles Starten unter dem Reiter "Actions"
 
 env:
+  # Unterbindet Node.js Deprecation-Warnungen im Jahr 2026
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 concurrency:
@@ -19,7 +19,7 @@ concurrency:
 jobs:
   bluebuild:
     name: Build Custom Image
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
       packages: write
@@ -29,7 +29,6 @@ jobs:
       matrix:
         recipe:
           - recipe.yml
-
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v4
@@ -43,53 +42,54 @@ jobs:
           cosign_private_key: ${{ secrets.SIGNING_SECRET }}
           maximize_build_space: true
 
-build-iso:
-  name: Generate ISO
-  needs: [bluebuild]
-  runs-on: ubuntu-latest
-  permissions:
-    contents: read
-    packages: write
-    id-token: write
+  build-iso:
+    name: Generate ISO
+    needs: [bluebuild] # Startet erst, wenn das Image fertig ist
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
 
-  steps:
-    - name: Checkout Repo
-      uses: actions/checkout@v4
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
 
-    - name: Login to GitHub Container Registry
-      uses: docker/login-action@v3
-      with:
-        registry: ghcr.io
-        username: ${{ github.actor }}
-        password: ${{ github.token }}
+      - name: Free Disk Space
+        run: |
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /opt/ghc
+          sudo rm -rf "/usr/local/share/boost"
+          sudo docker image prune --all --force
+          df -h
 
-    - name: Free Disk Space
-      run: |
-        sudo rm -rf /usr/share/dotnet
-        sudo rm -rf /usr/local/lib/android
-        sudo rm -rf /opt/ghc
-        sudo docker image prune --all --force
+      - name: Generate ISO
+        run: |
+          mkdir -p ./output
+          docker run --privileged \
+            -v $(pwd):/build \
+            -w /build \
+            ghcr.io/blue-build/isogenerator:main \
+            --image-name talic \
+            --image-tag latest \
+            --registry ghcr.io/${{ github.repository_owner }} \
+            --variant Kinoite \
+            --arch x86_64 \
+            --cosign-key cosign.pub
 
-    - name: Generate ISO
-      run: |
-        mkdir -p ./output
-        docker run --privileged \
-          -v $(pwd):/build \
-          -w /build \
-          ghcr.io/ublue-os/isogenerator:latest \
-          --image-name talic \
-          --image-tag latest \
-          --registry ghcr.io/${{ github.repository_owner }} \
-          --variant Kinoite \
-          --arch x86_64 \
-          --cosign-key cosign.pub
-
-    - name: Upload ISO as Artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: talic-os-iso
-        path: |
-          ./*.iso
-          ./*.sha256
-        if-no-files-found: error
-        retention-days: 7
+      - name: Upload ISO as Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: talic-os-iso
+          path: |
+            ./*.iso
+            ./*.sha256
+          if-no-files-found: error
+          retention-days: 7
