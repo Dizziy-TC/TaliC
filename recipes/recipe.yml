@@ -7,7 +7,6 @@ image-version: 43
 
 modules:
   # Deine Dateien (Logo, ASCII, Fastfetch-Config)
-  # Kopiert alles aus 'files/usr' nach '/usr' und 'files/etc' nach '/etc'
   - type: files
     files:
       - source: usr
@@ -15,18 +14,15 @@ modules:
       - source: etc
         destination: /etc
 
-  # Das Logo beim Hochfahren (Startup Splash)
-  - type: plymouth
-    data:
-      theme: bgrt
-
-  # System-Layer (Treiber, Hardware-Tools & Fastfetch)
+  # System-Layer (Hier installieren wir jetzt auch Plymouth)
   - type: rpm-ostree
     repos:
       - https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-43.noarch.rpm
       - https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-43.noarch.rpm
     install:
       - fastfetch
+      - plymouth
+      - plymouth-theme-bgrt
       - mangohud
       - gamemode
       - obs-studio
@@ -35,7 +31,7 @@ modules:
       - nvtop
       - btop
 
-  # App-Layer (Isoliert & Sicher als Flatpaks)
+  # App-Layer (Flatpaks)
   - type: default-flatpaks
     configurations:
       - install:
@@ -46,7 +42,7 @@ modules:
           - org.kde.kcalc
           - net.davidotek.pupgui2
 
-  # Scripte (Hier wird unter anderem dein Startmenü-Icon aktiviert)
+  # Scripte
   - type: script
     scripts:
       - post-install.sh
