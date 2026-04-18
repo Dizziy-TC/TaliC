@@ -14,15 +14,13 @@ modules:
       - source: etc
         destination: /etc
 
-  # System-Layer (Hier installieren wir jetzt auch Plymouth)
+  # System-Layer (Wir lassen Plymouth hier weg, da es schon im Basis-Image ist)
   - type: rpm-ostree
     repos:
       - https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-43.noarch.rpm
       - https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-43.noarch.rpm
     install:
       - fastfetch
-      - plymouth
-      - plymouth-theme-bgrt
       - mangohud
       - gamemode
       - obs-studio
