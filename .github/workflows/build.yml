@@ -42,9 +42,9 @@ jobs:
           cosign_private_key: ${{ secrets.SIGNING_SECRET }}
           maximize_build_space: true
 
-  build-iso:
+    build-iso:
     name: Generate ISO
-    needs: [bluebuild] # Startet erst, wenn das Image fertig ist
+    needs: [bluebuild]
     runs-on: ubuntu-24.04
     permissions:
       contents: read
@@ -74,22 +74,11 @@ jobs:
         run: |
           mkdir -p ./output
           docker run --privileged \
-            -v $(pwd):/build \
-            -w /build \
-            ghcr.io/blue-build/isogenerator:main \
+            -v $(pwd):/isogenerator/output \
+            -w /isogenerator/output \
+            ghcr.io/ublue-os/isogenerator:latest \
             --image-name talic \
             --image-tag latest \
             --registry ghcr.io/${{ github.repository_owner }} \
             --variant Kinoite \
-            --arch x86_64 \
-            --cosign-key cosign.pub
-
-      - name: Upload ISO as Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: talic-os-iso
-          path: |
-            ./*.iso
-            ./*.sha256
-          if-no-files-found: error
-          retention-days: 7
+            --arch x86_64
